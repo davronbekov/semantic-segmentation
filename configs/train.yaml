@@ -1,0 +1,22 @@
+device: 'cpu'
+epochs: 40
+
+optimizer:
+  lr: 0.0001
+
+loss:
+  adapter: 'smp'
+  loss_fn: 'jaccard_loss'
+
+preprocess:
+  train:
+    slices:
+      width: 256
+      height: 256
+  val:
+    slices:
+      width: 1024
+      height: 1024
+
+postprocess:
+  threshold: 0.5
