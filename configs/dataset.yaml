@@ -1,18 +1,5 @@
-main:
-  train:
-    data: './data/rooftops_ru/train'
-    consider: 1
-  val:
-    data: './data/rooftops_ru/val'
-    consider: 1
-
-custom:
-  train:
-    data: './data/rooftops_ch/train'
-    consider: 1
-  val:
-    data: './data/rooftops_ch/val'
-    consider: 1
+train_data: './data/train'
+val_data: './data/val'
 
 in_classes:
   - 1

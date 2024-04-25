@@ -1,6 +1,5 @@
 adapter: 'smp'
 arch: 'unet'
-path: './data/Unet_mit_b2_roofs_logits.pth'
 map_location: 'cpu'
 encoder_name: 'mit_b2'
 encoder_weights: NULL
