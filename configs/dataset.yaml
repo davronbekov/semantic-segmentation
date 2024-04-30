@@ -1,8 +1,10 @@
-train_data: './data/train'
-val_data: './data/val'
+data: './data/train_val/'
 
 in_classes:
   - 1
   - 2
   - 3
-out_classes: 4
+out_classes:
+  - 1
+  - 2
+  - 3

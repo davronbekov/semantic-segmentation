@@ -8,13 +8,13 @@ torch = "*"
 pyyaml = "*"
 argparse = "*"
 albumentations = "*"
-segmentation-models-pytorch = "*"
 torchvision = "*"
 six = "*"
 pytorch-lightning = "*"
 matplotlib = "*"
 rasterio = "*"
 ipykernel = "*"
+segmentation-models-pytorch = "*"
 
 [dev-packages]
 

@@ -14,7 +14,7 @@ class ValDataset(Dataset):
 
         self.kwargs = kwargs
 
-        self.image_reader = ImageReader('rasterio')
+        self.image_reader = ImageReader('pil')
 
     def __len__(self):
         return len(self.data)
@@ -29,16 +29,17 @@ class ValDataset(Dataset):
         return image, mask
 
     def __getitem__(self, index):
-        with self.image_reader.open(self.data[index]) as src:
-            dimensions = src.shape
+        image_file = self.data[index]
+        mask_file = f'{self.data[index][:-4]}_mask.png'
 
-            image = src.read(self.in_classes, boundless=True)
-            mask = src.read(self.out_classes, boundless=True)
+        with self.image_reader.open(image_file) as src:
+            image = np.array(src.convert('RGB'))
 
-            image = np.stack(image, axis=-1)
+        with self.image_reader.open(mask_file) as src:
+            mask = np.array(src.convert('RGB'))
 
         # transform
         image, mask = self.pre_process(image, mask)
-        mask = np.expand_dims(mask, axis=0)
+        mask = mask.permute(2, 0, 1)
 
-        return image, mask, dimensions
+        return image, mask

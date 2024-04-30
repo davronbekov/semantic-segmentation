@@ -13,9 +13,6 @@ class Model:
         if not self.model:
             raise Exception(f'{conf["adapter"]} at Model is not found!')
 
-        if conf['path']:
-            self.model.load_state_dict(torch.load(conf['path'], map_location=conf['map_location']))
-
     def __new__(cls, **kwargs):
         instance = super().__new__(cls)
         instance.__init__(**kwargs)
