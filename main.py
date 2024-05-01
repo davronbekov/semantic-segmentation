@@ -10,6 +10,7 @@ import segmentation_models_pytorch as smp
 import torch
 from src.augmentations.train_augmentation import train_augmentations
 from src.augmentations.val_augmentation import val_augmentations
+from src.vizualization import plot_results
 
 
 if __name__ == '__main__':
@@ -30,7 +31,7 @@ if __name__ == '__main__':
             slices=train_conf['preprocess']['train']['slices']
         )
     )
-
+    # val dataset
     val_dataloader = DataLoader(
         ValDataset(
             data=dataset_files[train_length:],
@@ -66,6 +67,7 @@ if __name__ == '__main__':
             tp, fp, fn, tn = smp.metrics.get_stats(out_mask.long(), mask.long(), num_classes=3, mode="multiclass")
             print(smp.metrics.iou_score(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
             print(smp.metrics.accuracy(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
+            plot_results(image, mask, out_mask)
 
         # val
         model.eval()

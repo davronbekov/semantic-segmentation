@@ -10,13 +10,13 @@ def plot_results(image, gt_mask, pr_mask):
     plt.axis("off")
 
     plt.subplot(1, 3, 2)
-    plt.imshow(gt_mask.numpy().squeeze())  # just squeeze classes dim, because we have only one class
+    plt.imshow(gt_mask.numpy().squeeze().transpose(1, 2, 0))  # just squeeze classes dim, because we have only one class
     plt.title("Ground truth")
     plt.axis("off")
 
-    pr_mask = (pr_mask > 0.5).float()
+    pr_mask = pr_mask.float()
     plt.subplot(1, 3, 3)
-    plt.imshow(pr_mask.numpy().squeeze())  # just squeeze classes dim, because we have only one class
+    plt.imshow(pr_mask.detach().numpy().squeeze().transpose(1, 2, 0))  # just squeeze classes dim, because we have only one class
     plt.title("Prediction")
     plt.axis("off")
 
