@@ -68,7 +68,7 @@ if __name__ == '__main__':
             tp, fp, fn, tn = smp.metrics.get_stats(out_mask.long(), mask.long(), num_classes=3, mode="multiclass")
             print('iou', smp.metrics.iou_score(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
             print('accuracy', smp.metrics.accuracy(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
-            # plot_results(image, mask, out_mask)
+            plot_results(image, mask, out_mask)
 
         # val
         model.eval()
