@@ -20,7 +20,7 @@ if __name__ == '__main__':
     train_conf = read_yaml('configs/train.yaml')
 
     # train datasets
-    dataset_files = scan_files(dataset_conf['data'])
+    dataset_files = scan_files(dataset_conf['data']['images'])
     train_length = round(len(dataset_files) * 0.8)
     train_dataloader = DataLoader(
         TrainDataset(
@@ -28,7 +28,7 @@ if __name__ == '__main__':
             in_classes=dataset_conf['in_classes'],
             out_classes=dataset_conf['out_classes'],
             preprocess=train_augmentations(),
-            slices=train_conf['preprocess']['train']['slices']
+            dataset_path=dataset_conf['data']
         )
     )
     # val dataset
@@ -37,7 +37,8 @@ if __name__ == '__main__':
             data=dataset_files[train_length:],
             in_classes=dataset_conf['in_classes'],
             out_classes=dataset_conf['out_classes'],
-            preprocess=val_augmentations()
+            preprocess=val_augmentations(),
+            dataset_path=dataset_conf['data']
         )
     )
 
@@ -47,7 +48,7 @@ if __name__ == '__main__':
         loss_fn=train_conf['loss']['loss_fn']
     )
 
-    for epoch in range(40):
+    for epoch in range(1):
         # train
         model.train()
         itm = tqdm(enumerate(train_dataloader), total=len(train_dataloader))
@@ -62,12 +63,12 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
 
-            out_mask = out_mask.detach() > 0
+            out_mask = out_mask.detach() > 0.5
 
             tp, fp, fn, tn = smp.metrics.get_stats(out_mask.long(), mask.long(), num_classes=3, mode="multiclass")
-            print(smp.metrics.iou_score(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
-            print(smp.metrics.accuracy(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
-            plot_results(image, mask, out_mask)
+            print('iou', smp.metrics.iou_score(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
+            print('accuracy', smp.metrics.accuracy(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
+            # plot_results(image, mask, out_mask)
 
         # val
         model.eval()
@@ -81,12 +82,12 @@ if __name__ == '__main__':
                 "tn": 0,
             }
 
-            for batch_idx, (image_original, mask_original, dimensions) in itm:
-                image = image_original.to(train_conf['device'])
-                mask = mask_original.to(train_conf['device'])
+            for batch_idx, (image, mask) in itm:
+                image = image.to(train_conf['device'])
+                mask = mask.to(train_conf['device'])
 
                 out_mask = model(image)
-                out_mask = out_mask.detach() > 0
+                out_mask = out_mask.detach() > 0.5
 
                 tp, fp, fn, tn = smp.metrics.get_stats(out_mask.long(), mask.long(), num_classes=3, mode="multiclass")
 
@@ -99,5 +100,12 @@ if __name__ == '__main__':
                 **stats,
                 reduction="micro-imagewise"
             )
-            print('main-micro-imagewise', iou)
+            print('iou', iou)
 
+            accuracy = smp.metrics.accuracy(
+                **stats,
+                reduction="micro-imagewise"
+            )
+            print('accuracy', accuracy)
+
+    torch.save(model.state_dict(), './models/semantic.pth')

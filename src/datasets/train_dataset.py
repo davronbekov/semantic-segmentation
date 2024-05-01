@@ -29,8 +29,8 @@ class TrainDataset(Dataset):
         return image, mask
 
     def __getitem__(self, index):
-        image_file = self.data[index]
-        mask_file = f'{self.data[index][:-4]}_mask.png'
+        image_file = f"{self.kwargs['dataset_path']['images']}/{self.data[index]}"
+        mask_file = f"{self.kwargs['dataset_path']['masks']}/{self.data[index][:-4]}_mask.png"
 
         with self.image_reader.open(image_file) as src:
             image = np.array(src.convert('RGB'))

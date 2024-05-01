@@ -14,6 +14,6 @@ def scan_files(dataset_path):
     scanned_images = []
 
     for image in os.listdir(dataset_path):
-        scanned_images.append(f'{dataset_path}/{image}')
+        scanned_images.append(image)
 
     return scanned_images

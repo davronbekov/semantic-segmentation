@@ -1,4 +1,6 @@
-data: './data/train_val/'
+data:
+  images: './data/train_val/images'
+  masks: './data/train_val/masks'
 
 in_classes:
   - 1
