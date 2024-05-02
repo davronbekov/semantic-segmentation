@@ -29,7 +29,7 @@ if __name__ == '__main__':
             out_classes=dataset_conf['out_classes'],
             preprocess=train_augmentations(),
             dataset_path=dataset_conf['data']
-        )
+        ),
     )
     # val dataset
     val_dataloader = DataLoader(
@@ -39,7 +39,7 @@ if __name__ == '__main__':
             out_classes=dataset_conf['out_classes'],
             preprocess=val_augmentations(),
             dataset_path=dataset_conf['data']
-        )
+        ),
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=train_conf['optimizer']['lr'])
@@ -48,8 +48,14 @@ if __name__ == '__main__':
         loss_fn=train_conf['loss']['loss_fn']
     )
 
-    for epoch in range(1):
+    for epoch in range(5):
         # train
+        stats = {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0,
+        }
         model.train()
         itm = tqdm(enumerate(train_dataloader), total=len(train_dataloader))
         for batch_idx, (image, mask) in itm:
@@ -66,9 +72,18 @@ if __name__ == '__main__':
             out_mask = out_mask.detach() > 0.5
 
             tp, fp, fn, tn = smp.metrics.get_stats(out_mask.long(), mask.long(), num_classes=3, mode="multiclass")
-            print('iou', smp.metrics.iou_score(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
-            print('accuracy', smp.metrics.accuracy(tp=tp, fp=fp, fn=fn, tn=tn, reduction="micro-imagewise"))
-            plot_results(image, mask, out_mask)
+            stats['tp'] += tp
+            stats['fp'] += fp
+            stats['fn'] += fn
+            stats['tn'] += tn
+            # plot_results(image, mask, out_mask)
+
+        print('train-scores', 'epoch', epoch)
+        print('iou', smp.metrics.iou_score(**stats, reduction="micro-imagewise"))
+        print('f1_score', smp.metrics.f1_score(**stats, reduction="micro-imagewise"))
+        print('accuracy', smp.metrics.accuracy(**stats, reduction="micro-imagewise"))
+        print('precision', smp.metrics.precision(**stats, reduction="micro-imagewise"))
+        print('recall', smp.metrics.recall(**stats, reduction="micro-imagewise"))
 
         # val
         model.eval()
@@ -96,16 +111,11 @@ if __name__ == '__main__':
                 stats['fn'] += fn
                 stats['tn'] += tn
 
-            iou = smp.metrics.iou_score(
-                **stats,
-                reduction="micro-imagewise"
-            )
-            print('iou', iou)
-
-            accuracy = smp.metrics.accuracy(
-                **stats,
-                reduction="micro-imagewise"
-            )
-            print('accuracy', accuracy)
+            print('val-scores', 'epoch', epoch)
+            print('iou', smp.metrics.iou_score(**stats, reduction="micro-imagewise"))
+            print('f1_score', smp.metrics.f1_score(**stats, reduction="micro-imagewise"))
+            print('accuracy', smp.metrics.accuracy(**stats, reduction="micro-imagewise"))
+            print('precision', smp.metrics.precision(**stats, reduction="micro-imagewise"))
+            print('recall', smp.metrics.recall(**stats, reduction="micro-imagewise"))
 
     torch.save(model.state_dict(), './models/semantic.pth')
